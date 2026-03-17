@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>다이렉트237 자동차보험 견적 의뢰서</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Malgun Gothic', '맑은 고딕', sans-serif;
+            background: #f5f6fa;
+            color: #2d3436;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 0;
+            min-height: 100vh;
+            background: #fff;
+        }
+
+        /* 헤더 */
+        .header {
+            background: linear-gradient(135deg, #0984e3, #6c5ce7);
+            color: #fff;
+            padding: 32px 24px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.85;
+        }
+
+        /* 폼 영역 */
+        .form-body {
+            padding: 24px 20px 40px;
+        }
+
+        .section {
+            margin-bottom: 28px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #2d3436;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #0984e3;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title .num {
+            background: #0984e3;
+            color: #fff;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+        }
+
+        /* 의뢰 유형 선택 */
+        .type-selector {
+            display: flex;
+            gap: 10px;
+        }
+
+        .type-btn {
+            flex: 1;
+            padding: 14px 8px;
+            border: 2px solid #dfe6e9;
+            border-radius: 12px;
+            background: #fff;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+            font-size: 14px;
+            font-weight: 600;
+            color: #636e72;
+        }
+
+        .type-btn:hover {
+            border-color: #0984e3;
+            color: #0984e3;
+        }
+
+        .type-btn.active {
+            border-color: #0984e3;
+            background: #ebf5ff;
+            color: #0984e3;
+        }
+
+        .type-btn .icon {
+            font-size: 28px;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        /* 입력 필드 */
+        .field {
+            margin-bottom: 14px;
+        }
+
+        .field label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #636e72;
+            margin-bottom: 6px;
+        }
+
+        .field label .required {
+            color: #e17055;
+            margin-left: 2px;
+        }
+
+        .field input,
+        .field select {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1.5px solid #dfe6e9;
+            border-radius: 10px;
+            font-size: 15px;
+            color: #2d3436;
+            background: #fff;
+            transition: border-color 0.2s;
+            -webkit-appearance: none;
+        }
+
+        .field input:focus,
+        .field select:focus {
+            outline: none;
+            border-color: #0984e3;
+            box-shadow: 0 0 0 3px rgba(9, 132, 227, 0.1);
+        }
+
+        .field input::placeholder {
+            color: #b2bec3;
+        }
+
+        .field-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .field-row .field {
+            flex: 1;
+        }
+
+        /* 주민번호 특수 필드 */
+        .ssn-field {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .ssn-field input {
+            text-align: center;
+        }
+
+        .ssn-field .dash {
+            font-size: 18px;
+            color: #b2bec3;
+            font-weight: bold;
+        }
+
+        .ssn-field .ssn-back {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .ssn-field .ssn-back input {
+            width: 40px;
+            flex-shrink: 0;
+        }
+
+        .ssn-field .ssn-back .dots {
+            font-size: 20px;
+            color: #b2bec3;
+            letter-spacing: 4px;
+        }
+
+        /* 추가 정보 토글 */
+        .toggle-section {
+            border: 1.5px solid #dfe6e9;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 14px;
+        }
+
+        .toggle-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 16px;
+            background: #fafafa;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .toggle-header span {
+            font-size: 14px;
+            font-weight: 600;
+            color: #636e72;
+        }
+
+        .toggle-header .arrow {
+            transition: transform 0.2s;
+            color: #b2bec3;
+        }
+
+        .toggle-header .arrow.open {
+            transform: rotate(180deg);
+        }
+
+        .toggle-content {
+            padding: 16px;
+            display: none;
+            border-top: 1px solid #eee;
+        }
+
+        .toggle-content.show {
+            display: block;
+        }
+
+        /* 추가운전자 항목 */
+        .driver-item {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 14px;
+            margin-bottom: 10px;
+            position: relative;
+        }
+
+        .driver-item .remove-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 24px;
+            height: 24px;
+            border: none;
+            background: #e17055;
+            color: #fff;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .add-btn {
+            width: 100%;
+            padding: 10px;
+            border: 1.5px dashed #b2bec3;
+            border-radius: 10px;
+            background: transparent;
+            color: #636e72;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .add-btn:hover {
+            border-color: #0984e3;
+            color: #0984e3;
+        }
+
+        /* 개인정보 동의 */
+        .consent-box {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+
+        .consent-box .consent-title {
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #2d3436;
+        }
+
+        .consent-detail {
+            font-size: 12px;
+            color: #636e72;
+            background: #fff;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 12px;
+            max-height: 120px;
+            overflow-y: auto;
+            line-height: 1.8;
+            border: 1px solid #eee;
+        }
+
+        .consent-check {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+
+        .consent-check input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            accent-color: #0984e3;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .consent-check label {
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .consent-check label .highlight {
+            color: #0984e3;
+        }
+
+        .purpose-banner {
+            background: linear-gradient(135deg, #d63031, #e17055);
+            color: #fff;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .purpose-banner .main-text {
+            font-size: 18px;
+            font-weight: 800;
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+
+        .purpose-banner .sub-text {
+            font-size: 14px;
+            font-weight: 600;
+            opacity: 0.9;
+            border-top: 1px solid rgba(255,255,255,0.3);
+            padding-top: 10px;
+            margin-top: 4px;
+        }
+
+        .consent-all {
+            background: #ebf5ff;
+            border: 2px solid #0984e3;
+            border-radius: 12px;
+            padding: 14px 16px;
+            margin-bottom: 16px;
+        }
+
+        .consent-all .consent-check label {
+            font-size: 15px;
+            color: #0984e3;
+        }
+
+        /* 제출 버튼 */
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #0984e3, #6c5ce7);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-size: 17px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            margin-top: 10px;
+        }
+
+        .submit-btn:hover {
+            opacity: 0.9;
+        }
+
+        .submit-btn:disabled {
+            background: #b2bec3;
+            cursor: not-allowed;
+        }
+
+        /* 안내 문구 */
+        .notice {
+            text-align: center;
+            font-size: 12px;
+            color: #b2bec3;
+            margin-top: 16px;
+            padding-bottom: 20px;
+        }
+
+        /* 완료 화면 */
+        .complete-screen {
+            display: none;
+            text-align: center;
+            padding: 60px 24px;
+        }
+
+        .complete-screen .check-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #00b894, #00cec9);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            font-size: 40px;
+            color: #fff;
+        }
+
+        .complete-screen h2 {
+            font-size: 22px;
+            margin-bottom: 12px;
+            color: #2d3436;
+        }
+
+        .complete-screen p {
+            font-size: 15px;
+            color: #636e72;
+            line-height: 1.7;
+        }
+
+        /* 의뢰인 섹션 숨김 처리 */
+        #referrerSection {
+            display: none;
+        }
+
+        #referrerSection.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 헤더 -->
+        <div class="header">
+            <h1>🔷 다이렉트237 자동차보험 견적 의뢰서</h1>
+            <p>보다 합리적인 자동차보험 비교 견적을 위해<br>아래 정보를 정확히 입력해 주세요.</p>
+            <p style="font-size:12px;opacity:0.75;margin-top:6px;">(입력하신 정보는 견적 안내 외 다른 용도로 사용되지 않습니다.)</p>
+        </div>
+
+        <!-- 폼 -->
+        <div class="form-body" id="formArea">
+
+            <!-- 1. 의뢰 유형 -->
+            <div class="section">
+                <div class="section-title">
+                    <span class="num">1</span> 의뢰 유형
+                </div>
+                <div class="type-selector">
+                    <div class="type-btn" data-type="agent" onclick="selectType(this)">
+                        <span class="icon">&#128188;</span>
+                        설계사
+                    </div>
+                    <div class="type-btn" data-type="dealer" onclick="selectType(this)">
+                        <span class="icon">&#128663;</span>
+                        딜러
+                    </div>
+                    <div class="type-btn" data-type="individual" onclick="selectType(this)">
+                        <span class="icon">&#128100;</span>
+                        개인
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. 의뢰인 정보 (설계사/딜러 선택 시) -->
+            <div class="section" id="referrerSection">
+                <div class="section-title">
+                    <span class="num">2</span> <span id="referrerTitle">의뢰인 정보</span>
+                </div>
+                <div class="field">
+                    <label><span id="referrerNameLabel">성함</span> <span class="required">*</span></label>
+                    <input type="text" id="referrerName" placeholder="성함 입력">
+                </div>
+                <div class="field">
+                    <label>연락처 <span class="required">*</span></label>
+                    <input type="tel" id="referrerPhone" placeholder="010-0000-0000" oninput="formatPhone(this)">
+                </div>
+            </div>
+
+            <!-- 3. 고객 정보 -->
+            <div class="section" id="customerSection">
+                <div class="section-title">
+                    <span class="num" id="customerNum">2</span> 고객 정보
+                </div>
+                <!-- 개인/법인 선택 -->
+                <div class="field-row" style="margin-bottom:14px;">
+                    <div class="type-btn active" data-ctype="personal" onclick="selectCustType(this)" style="flex:1;padding:10px;">개인</div>
+                    <div class="type-btn" data-ctype="corporate" onclick="selectCustType(this)" style="flex:1;padding:10px;">법인</div>
+                </div>
+                <div class="field">
+                    <label><span id="custNameLabel">성함</span> <span class="required">*</span></label>
+                    <input type="text" id="custName" placeholder="실명 입력">
+                </div>
+                <div class="field-row">
+                    <div class="field" style="flex:2">
+                        <label>연락처 <span class="required">*</span></label>
+                        <input type="tel" id="custPhone" placeholder="010-0000-0000" oninput="formatPhone(this)">
+                    </div>
+                    <div class="field" style="flex:1">
+                        <label>통신사 <span class="required">*</span></label>
+                        <select id="carrier">
+                            <option value="">선택</option>
+                            <option value="SKT">SKT</option>
+                            <option value="KT">KT</option>
+                            <option value="LGU+">LG U+</option>
+                            <option value="SKT알뜰">SKT 알뜰폰</option>
+                            <option value="KT알뜰">KT 알뜰폰</option>
+                            <option value="LGU+알뜰">LG U+ 알뜰폰</option>
+                        </select>
+                    </div>
+                </div>
+                <!-- 개인: 주민등록번호 -->
+                <div class="field" id="ssnField">
+                    <label>주민등록번호 <span class="required">*</span></label>
+                    <div class="ssn-field">
+                        <input type="text" id="ssnFront" maxlength="6" placeholder="생년월일" inputmode="numeric" oninput="moveToBack(this)" style="flex:1">
+                        <span class="dash">-</span>
+                        <div class="ssn-back">
+                            <input type="password" id="ssnBack" maxlength="7" inputmode="numeric" placeholder="&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;&#9679;" style="flex:1">
+                        </div>
+                    </div>
+                </div>
+                <!-- 법인: 사업자번호 -->
+                <div class="field" id="bizField" style="display:none;">
+                    <label>사업자등록번호 <span class="required">*</span></label>
+                    <input type="text" id="bizNumber" maxlength="12" placeholder="000-00-00000" inputmode="numeric" oninput="formatBiz(this)">
+                </div>
+                <div class="field">
+                    <label>차량번호 <span class="required">*</span></label>
+                    <input type="text" id="carNumber" placeholder="12가3456">
+                </div>
+            </div>
+
+            <!-- 4. 추가 정보 -->
+            <div class="section" id="extraSection">
+                <div class="section-title">
+                    <span class="num" id="extraNum">3</span> 추가 정보 <span style="font-size:12px;color:#b2bec3;font-weight:400;margin-left:4px;">(해당 시에만)</span>
+                </div>
+
+                <!-- 추가 운전자 -->
+                <div class="toggle-section">
+                    <div class="toggle-header" onclick="toggleSection('driverToggle')">
+                        <span>&#128101; 추가 운전자</span>
+                        <span class="arrow" id="driverToggleArrow">&#9660;</span>
+                    </div>
+                    <div class="toggle-content" id="driverToggle">
+                        <div id="driverList"></div>
+                        <button class="add-btn" onclick="addDriver()">+ 추가 운전자 등록</button>
+                    </div>
+                </div>
+
+                <!-- 자녀 할인 -->
+                <div class="toggle-section">
+                    <div class="toggle-header" onclick="toggleSection('childToggle')">
+                        <span>&#128118; 자녀 할인</span>
+                        <span class="arrow" id="childToggleArrow">&#9660;</span>
+                    </div>
+                    <div class="toggle-content" id="childToggle">
+                        <div id="childList"></div>
+                        <button class="add-btn" onclick="addChild()">+ 자녀 추가</button>
+                    </div>
+                </div>
+
+                <!-- 메모 -->
+                <div class="field" style="margin-top:4px;">
+                    <label>요청사항</label>
+                    <input type="text" id="memo" placeholder="특이사항이 있으면 입력해주세요">
+                </div>
+            </div>
+
+            <!-- 5. 개인정보 동의 -->
+            <div class="section">
+                <div class="section-title">
+                    <span class="num" id="consentNum">4</span> 개인정보 동의
+                </div>
+
+                <!-- 목적 안내 배너 -->
+                <div class="purpose-banner">
+                    <div class="main-text">
+                        고객님의 개인정보는<br>
+                        자동차보험 비교견적 산출 목적으로만<br>
+                        사용됩니다.
+                    </div>
+                    <div class="sub-text">
+                        그 외 목적으로는 절대 사용하지 않으며,<br>
+                        만기 관리 및 갱신 안내를 위해 보유 후<br>
+                        동의 철회 시 즉시 파기합니다.
+                    </div>
+                </div>
+
+                <!-- 전체 동의 -->
+                <div class="consent-all">
+                    <div class="consent-check">
+                        <input type="checkbox" id="agreeAll" onchange="toggleAll(this)">
+                        <label for="agreeAll"><span class="highlight">전체 동의하기</span></label>
+                    </div>
+                </div>
+
+                <!-- 개인정보 수집 이용 동의 -->
+                <div class="consent-box">
+                    <div class="consent-title">개인정보 수집 및 이용 동의 (필수)</div>
+                    <div class="consent-detail">
+                        <strong>1. 수집 항목</strong><br>
+                        성명, 연락처, 주민등록번호, 차량번호, 통신사 정보, 추가운전자 정보(성명, 생년월일), 자녀 생년월일<br><br>
+                        <strong>2. 수집 및 이용 목적</strong><br>
+                        자동차보험 비교 견적 산출 및 보험 가입 대행<br><br>
+                        <strong>3. 보유 및 이용 기간</strong><br>
+                        보험 만기 관리 및 갱신 안내 목적으로 계약 유지 기간 동안 보유 (동의 철회 시 즉시 파기)<br><br>
+                        <strong>4. 동의 거부 권리</strong><br>
+                        귀하는 개인정보 수집 및 이용에 대한 동의를 거부할 권리가 있습니다. 다만, 동의 거부 시 보험 견적 서비스 이용이 제한됩니다.
+                    </div>
+                    <div class="consent-check">
+                        <input type="checkbox" id="agree1" class="consent-item" onchange="checkConsent()">
+                        <label for="agree1">개인정보 수집 및 이용에 동의합니다</label>
+                    </div>
+                </div>
+
+                <!-- 고유식별정보 처리 동의 -->
+                <div class="consent-box">
+                    <div class="consent-title">고유식별정보 처리 동의 (필수)</div>
+                    <div class="consent-detail">
+                        <strong>1. 고유식별정보 항목</strong><br>
+                        주민등록번호<br><br>
+                        <strong>2. 처리 목적</strong><br>
+                        보험료 산출을 위한 본인 확인 및 보험 가입 처리<br><br>
+                        <strong>3. 보유 기간</strong><br>
+                        보험 계약 유지 기간 동안 보유 (동의 철회 시 즉시 파기)
+                    </div>
+                    <div class="consent-check">
+                        <input type="checkbox" id="agree2" class="consent-item" onchange="checkConsent()">
+                        <label for="agree2">고유식별정보 처리에 동의합니다</label>
+                    </div>
+                </div>
+
+                <!-- 제3자 제공 동의 -->
+                <div class="consent-box">
+                    <div class="consent-title">개인정보 제3자 제공 동의 (필수)</div>
+                    <div class="consent-detail">
+                        <strong>1. 제공받는 자</strong><br>
+                        보험사 (삼성화재, 현대해상, DB손해보험, KB손해보험, 메리츠화재, 한화손해보험, 롯데손해보험, MG손해보험, 흥국화재 등)<br><br>
+                        <strong>2. 제공 항목</strong><br>
+                        성명, 주민등록번호, 연락처, 차량번호<br><br>
+                        <strong>3. 제공 목적</strong><br>
+                        자동차보험 비교 견적 산출<br><br>
+                        <strong>4. 보유 기간</strong><br>
+                        제공 목적 달성 시까지
+                    </div>
+                    <div class="consent-check">
+                        <input type="checkbox" id="agree3" class="consent-item" onchange="checkConsent()">
+                        <label for="agree3">개인정보 제3자 제공에 동의합니다</label>
+                    </div>
+                </div>
+
+                <!-- 개인정보 보관 기간 동의 -->
+                <div class="consent-box">
+                    <div class="consent-title">개인정보 보관 기간 동의 (필수)</div>
+                    <div class="consent-detail">
+                        수집된 개인정보는 보험 가입일로부터 <strong>1년간 보관</strong>됩니다.<br><br>
+                        보관 기간 동안 보험 만기 관리 및 갱신 비교견적 안내 목적으로만 활용되며, 보관 기간 종료 후 지체 없이 파기합니다.<br><br>
+                        보관 기간 내라도 고객님의 요청 시 즉시 파기 가능합니다.
+                    </div>
+                    <div class="consent-check">
+                        <input type="checkbox" id="agree4" class="consent-item" onchange="checkConsent()">
+                        <label for="agree4">개인정보 1년 보관에 동의합니다</label>
+                    </div>
+                </div>
+
+                <!-- 만기 안내 동의 -->
+                <div class="consent-box">
+                    <div class="consent-title">보험 만기 안내 수신 동의 (필수)</div>
+                    <div class="consent-detail">
+                        보험 만기 <strong>1개월 전</strong> 문자(SMS) 또는 전화를 통해 만기 안내 및 갱신 비교견적 서비스를 제공합니다.<br><br>
+                        만기 안내를 원하지 않으실 경우 언제든 수신 거부를 요청하실 수 있습니다.
+                    </div>
+                    <div class="consent-check">
+                        <input type="checkbox" id="agree5" class="consent-item" onchange="checkConsent()">
+                        <label for="agree5">보험 만기 1개월 전 안내 수신에 동의합니다</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 제출 버튼 -->
+            <button class="submit-btn" id="submitBtn" disabled onclick="submitForm()">
+                견적 의뢰하기
+            </button>
+
+            <div class="notice">
+                입력하신 정보는 암호화되어 안전하게 전송됩니다.<br>
+                문의: 000-0000-0000
+            </div>
+        </div>
+
+        <!-- 완료 화면 -->
+        <div class="complete-screen" id="completeScreen">
+            <div class="check-icon">&#10003;</div>
+            <h2>견적 의뢰 완료</h2>
+            <p>
+                접수가 정상적으로 완료되었습니다.<br>
+                빠른 시간 내에 최저가 견적을<br>
+                안내드리겠습니다.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        let selectedType = '';
+        let selectedCustType = 'personal';
+        let driverCount = 0;
+        let childCount = 0;
+
+        // 개인/법인 선택
+        function selectCustType(el) {
+            el.parentElement.querySelectorAll('.type-btn').forEach(btn => btn.classList.remove('active'));
+            el.classList.add('active');
+            selectedCustType = el.dataset.ctype;
+
+            if (selectedCustType === 'corporate') {
+                document.getElementById('custNameLabel').textContent = '법인명';
+                document.getElementById('custName').placeholder = '법인명 입력';
+                document.getElementById('ssnField').style.display = 'none';
+                document.getElementById('bizField').style.display = 'block';
+            } else {
+                document.getElementById('custNameLabel').textContent = '성함';
+                document.getElementById('custName').placeholder = '실명 입력';
+                document.getElementById('ssnField').style.display = 'block';
+                document.getElementById('bizField').style.display = 'none';
+            }
+        }
+
+        // 사업자번호 자동 포맷
+        function formatBiz(el) {
+            let num = el.value.replace(/[^0-9]/g, '');
+            if (num.length <= 3) {
+                el.value = num;
+            } else if (num.length <= 5) {
+                el.value = num.slice(0, 3) + '-' + num.slice(3);
+            } else {
+                el.value = num.slice(0, 3) + '-' + num.slice(3, 5) + '-' + num.slice(5, 10);
+            }
+        }
+
+        // 의뢰 유형 선택
+        function selectType(el) {
+            document.querySelectorAll('.type-btn').forEach(btn => btn.classList.remove('active'));
+            el.classList.add('active');
+            selectedType = el.dataset.type;
+
+            const referrerSection = document.getElementById('referrerSection');
+            const referrerTitle = document.getElementById('referrerTitle');
+            const referrerNameLabel = document.getElementById('referrerNameLabel');
+
+            if (selectedType === 'agent') {
+                referrerSection.classList.add('show');
+                referrerTitle.textContent = '설계사 정보';
+                referrerNameLabel.textContent = '성함';
+                document.getElementById('customerNum').textContent = '3';
+                document.getElementById('extraNum').textContent = '4';
+                document.getElementById('consentNum').textContent = '5';
+            } else if (selectedType === 'dealer') {
+                referrerSection.classList.add('show');
+                referrerTitle.textContent = '딜러 정보';
+                referrerNameLabel.textContent = '성함';
+                document.getElementById('customerNum').textContent = '3';
+                document.getElementById('extraNum').textContent = '4';
+                document.getElementById('consentNum').textContent = '5';
+            } else {
+                referrerSection.classList.remove('show');
+                document.getElementById('customerNum').textContent = '2';
+                document.getElementById('extraNum').textContent = '3';
+                document.getElementById('consentNum').textContent = '4';
+            }
+        }
+
+        // 전화번호 자동 포맷
+        function formatPhone(el) {
+            let num = el.value.replace(/[^0-9]/g, '');
+            if (num.length <= 3) {
+                el.value = num;
+            } else if (num.length <= 7) {
+                el.value = num.slice(0, 3) + '-' + num.slice(3);
+            } else {
+                el.value = num.slice(0, 3) + '-' + num.slice(3, 7) + '-' + num.slice(7, 11);
+            }
+        }
+
+        // 주민번호 앞자리 입력 후 자동 이동
+        function moveToBack(el) {
+            el.value = el.value.replace(/[^0-9]/g, '');
+            if (el.value.length === 6) {
+                document.getElementById('ssnBack').focus();
+            }
+        }
+
+        // 토글 섹션
+        function toggleSection(id) {
+            const content = document.getElementById(id);
+            const arrow = document.getElementById(id + 'Arrow');
+            content.classList.toggle('show');
+            arrow.classList.toggle('open');
+        }
+
+        // 추가 운전자
+        function addDriver() {
+            driverCount++;
+            const div = document.createElement('div');
+            div.className = 'driver-item';
+            div.id = 'driver' + driverCount;
+            div.innerHTML = `
+                <button class="remove-btn" onclick="removeItem('driver${driverCount}')">&times;</button>
+                <div class="field">
+                    <label>이름</label>
+                    <input type="text" placeholder="추가 운전자 이름">
+                </div>
+                <div class="field-row">
+                    <div class="field">
+                        <label>생년월일</label>
+                        <input type="text" maxlength="8" placeholder="19900101" inputmode="numeric">
+                    </div>
+                    <div class="field">
+                        <label>관계</label>
+                        <select>
+                            <option value="">선택</option>
+                            <option value="spouse">배우자</option>
+                            <option value="parent">부모</option>
+                            <option value="child">자녀</option>
+                            <option value="sibling">형제자매</option>
+                            <option value="other">기타</option>
+                        </select>
+                    </div>
+                </div>
+            `;
+            document.getElementById('driverList').appendChild(div);
+        }
+
+        // 자녀 추가
+        function addChild() {
+            childCount++;
+            const div = document.createElement('div');
+            div.className = 'driver-item';
+            div.id = 'child' + childCount;
+            div.innerHTML = `
+                <button class="remove-btn" onclick="removeItem('child${childCount}')">&times;</button>
+                <div class="field-row">
+                    <div class="field">
+                        <label>자녀 이름</label>
+                        <input type="text" placeholder="이름">
+                    </div>
+                    <div class="field">
+                        <label>생년월일</label>
+                        <input type="text" maxlength="8" placeholder="20100101" inputmode="numeric">
+                    </div>
+                </div>
+            `;
+            document.getElementById('childList').appendChild(div);
+        }
+
+        // 항목 삭제
+        function removeItem(id) {
+            document.getElementById(id).remove();
+        }
+
+        // 전체 동의
+        function toggleAll(el) {
+            document.querySelectorAll('.consent-item, .consent-item').forEach(cb => {
+                cb.checked = el.checked;
+            });
+            checkConsent();
+        }
+
+        // 동의 체크 확인
+        function checkConsent() {
+            const all = document.querySelectorAll('.consent-item');
+            const allChecked = Array.from(all).every(cb => cb.checked);
+            document.getElementById('agreeAll').checked = allChecked;
+            document.getElementById('submitBtn').disabled = !allChecked;
+        }
+
+        // 제출
+        function submitForm() {
+            // 필수 입력 검증
+            if (!selectedType) {
+                alert('의뢰 유형을 선택해주세요.');
+                return;
+            }
+
+            if (selectedType !== 'individual') {
+                if (!document.getElementById('referrerName').value.trim()) {
+                    alert('의뢰인 정보를 입력해주세요.');
+                    return;
+                }
+            }
+
+            const custName = document.getElementById('custName').value.trim();
+            const custPhone = document.getElementById('custPhone').value.trim();
+            const carrier = document.getElementById('carrier').value;
+            const carNumber = document.getElementById('carNumber').value.trim();
+
+            if (selectedCustType === 'personal') {
+                const ssnFront = document.getElementById('ssnFront').value.trim();
+                const ssnBack = document.getElementById('ssnBack').value.trim();
+                if (!custName || !custPhone || !ssnFront || !ssnBack || !carrier || !carNumber) {
+                    alert('고객 정보를 모두 입력해주세요.');
+                    return;
+                }
+                if (ssnFront.length !== 6 || ssnBack.length !== 7) {
+                    alert('주민등록번호를 정확히 입력해주세요.');
+                    return;
+                }
+            } else {
+                const bizNumber = document.getElementById('bizNumber').value.trim();
+                if (!custName || !custPhone || !bizNumber || !carrier || !carNumber) {
+                    alert('고객 정보를 모두 입력해주세요.');
+                    return;
+                }
+            }
+
+            // 폼 데이터 수집 (실제 서비스에서는 서버로 전송)
+            const formData = {
+                type: selectedType,
+                custType: selectedCustType,
+                referrer: selectedType !== 'individual' ? {
+                    name: document.getElementById('referrerName').value,
+                    phone: document.getElementById('referrerPhone').value
+                } : null,
+                customer: {
+                    name: custName,
+                    phone: custPhone,
+                    ssn: selectedCustType === 'personal' ? document.getElementById('ssnFront').value + '-' + document.getElementById('ssnBack').value : null,
+                    bizNumber: selectedCustType === 'corporate' ? document.getElementById('bizNumber').value : null,
+                    carrier: carrier,
+                    carNumber: carNumber
+                },
+                memo: document.getElementById('memo').value,
+                consent: {
+                    collection: true,
+                    identification: true,
+                    thirdParty: true,
+                    timestamp: new Date().toISOString()
+                }
+            };
+
+            console.log('제출 데이터:', formData);
+
+            // 완료 화면 표시
+            document.getElementById('formArea').style.display = 'none';
+            document.getElementById('completeScreen').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
