@@ -938,36 +938,69 @@
                 }
             }
 
-            // 폼 데이터 수집 (실제 서비스에서는 서버로 전송)
+            // 추가운전자 정보 수집
+            const drivers = [];
+            document.querySelectorAll('#driverList .driver-item').forEach(item => {
+                const inputs = item.querySelectorAll('input');
+                const select = item.querySelector('select');
+                drivers.push(inputs[0].value + ' / ' + inputs[1].value + ' / ' + (select ? select.value : ''));
+            });
+
+            // 자녀 정보 수집
+            const children = [];
+            document.querySelectorAll('#childList .driver-item').forEach(item => {
+                const inputs = item.querySelectorAll('input');
+                children.push(inputs[0].value + ' / ' + inputs[1].value);
+            });
+
+            const now = new Date();
+            const timestamp = now.getFullYear() + '-' +
+                String(now.getMonth()+1).padStart(2,'0') + '-' +
+                String(now.getDate()).padStart(2,'0') + ' ' +
+                String(now.getHours()).padStart(2,'0') + ':' +
+                String(now.getMinutes()).padStart(2,'0') + ':' +
+                String(now.getSeconds()).padStart(2,'0');
+
+            const typeNames = {agent: '설계사', dealer: '딜러', individual: '개인'};
+
             const formData = {
-                type: selectedType,
-                custType: selectedCustType,
-                referrer: selectedType !== 'individual' ? {
-                    name: document.getElementById('referrerName').value,
-                    phone: document.getElementById('referrerPhone').value
-                } : null,
-                customer: {
-                    name: custName,
-                    phone: custPhone,
-                    ssn: selectedCustType === 'personal' ? document.getElementById('ssnFront').value + '-' + document.getElementById('ssnBack').value : null,
-                    bizNumber: selectedCustType === 'corporate' ? document.getElementById('bizNumber').value : null,
-                    carrier: carrier,
-                    carNumber: carNumber
-                },
+                timestamp: timestamp,
+                type: typeNames[selectedType] || selectedType,
+                referrerName: selectedType !== 'individual' ? document.getElementById('referrerName').value : '',
+                referrerPhone: selectedType !== 'individual' ? document.getElementById('referrerPhone').value : '',
+                custType: selectedCustType === 'personal' ? '개인' : '법인',
+                custName: custName,
+                custPhone: custPhone,
+                carrier: carrier,
+                ssn: selectedCustType === 'personal' ? document.getElementById('ssnFront').value + '-' + document.getElementById('ssnBack').value : '',
+                bizNumber: selectedCustType === 'corporate' ? document.getElementById('bizNumber').value : '',
+                carNumber: carNumber,
+                drivers: drivers.join(' | '),
+                children: children.join(' | '),
                 memo: document.getElementById('memo').value,
-                consent: {
-                    collection: true,
-                    identification: true,
-                    thirdParty: true,
-                    timestamp: new Date().toISOString()
-                }
+                consent: '전체동의',
+                consentTime: timestamp
             };
 
-            console.log('제출 데이터:', formData);
+            // 제출 버튼 비활성화
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = '전송 중...';
 
-            // 완료 화면 표시
-            document.getElementById('formArea').style.display = 'none';
-            document.getElementById('completeScreen').style.display = 'block';
+            // Google 스프레드시트로 전송
+            fetch('https://script.google.com/macros/s/AKfycbybJkLzv7TCW15VywiYgLxYszvK1G5KdVoftHrFzf4CrKZP-whRa9gEAShOCHWkNIjJ/exec', {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            }).then(() => {
+                document.getElementById('formArea').style.display = 'none';
+                document.getElementById('completeScreen').style.display = 'block';
+            }).catch(error => {
+                alert('전송 중 오류가 발생했습니다. 다시 시도해주세요.');
+                submitBtn.disabled = false;
+                submitBtn.textContent = '견적 의뢰하기';
+            });
         }
     </script>
 </body>
